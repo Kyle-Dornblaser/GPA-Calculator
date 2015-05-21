@@ -24,37 +24,52 @@ var model = {
     localStorage.comkyledornblasergpacalc = JSON.stringify(json);
     console.log('saving');
   },
-  savePast: function(key, value) {
+  savePast: function(element, key) {
+    var value = element.value;
     if (key === 'pastGPA') {
       if (this.isValidGPA(value)) {
         var updatedData = this.data();
         updatedData[key] = value;
+        controller.removeError(element);
         this.save(updatedData);
+      } else {
+        controller.addError(element);
       }
     } else if (key === 'pastHours') {
-      if (this.isValidHours(value)) {
+      if (this.isValidPastHours(value)) {
         var updatedData = this.data();
         updatedData[key] = value;
+        controller.removeError(element);
         this.save(updatedData);
+      } else {
+        controller.addError(element);
       }
     } else {
       alert('Unknown key: ' + key);
       console.log('Unknown key: ' + key);
     }
   },
-  saveCurrent: function(id, key, value) {
+  saveCurrent: function(element, key) {
+    var id = element.uniqueID;
+    var value = element.value
     var updatedData = this.data();
     for (var i = 0; i < updatedData.currentClasses.length; i++) {
       if (updatedData.currentClasses[i].id === id) {
         if (key === 'grade') {
           if (this.isValidGPA(value)) {
             updatedData.currentClasses[i][key] = value;
+            controller.removeError(element);
             this.save(updatedData);
+          } else {
+            controller.addError(element);
           }
         } else if (key === 'hours') {
           if (this.isValidHours(value)) {
             updatedData.currentClasses[i][key] = value;
+            controller.removeError(element);
             this.save(updatedData);
+          } else {
+            controller.addError(element);
           }
         } else {
           alert('Unknown key: ' + key);
@@ -62,20 +77,6 @@ var model = {
         }
       }
     }
-  },
-  valid: function(json) {
-    var valid = true;
-    if (this.isValidGrade(json.pastGPA) || this.isValidHours(json.pastHours)) {
-      valid = false;
-    } else {
-      var currentClasses = json.currentClasses;
-      for (var i = 0; i < currentClasses.length; i++) {
-        if (this.isValidGrade(currentClasses[i].grade) || this.isValidHours(currentClasses[i].hours)) {
-          valid = false;
-        }
-      }
-    }
-    return valid;
   },
   isValidGPA: function(grade) {
     var minLength = 1;
@@ -87,6 +88,22 @@ var model = {
     } else if (grade.length < minLength || grade.length > maxLengh) {
       valid = false;
     } else if (grade < minValue || grade > maxValue) {
+      valid = false;
+    } else {
+      valid = true;
+    }
+    return valid;
+  },
+  isValidPastHours: function(hours) {
+    var minLength = 1;
+    var maxLengh = 3;
+    var minValue = 1;
+    var maxValue = 200;
+    if (isNaN(hours)) {
+      valid = false;
+    } else if (hours.length < minLength || hours.length > maxLengh) {
+      valid = false;
+    } else if (hours < minValue || hours > maxValue) {
       valid = false;
     } else {
       valid = true;
@@ -157,13 +174,13 @@ var viewInput = {
 
     this.pastGPA.addEventListener('keyup', function() {
       if (this.value) {
-        controller.update('pastGPA', this.value);
+        controller.update(this, 'pastGPA');
       }
     });
 
     this.pastHours.addEventListener('keyup', function() {
       if (this.value) {
-        controller.update('pastHours', this.value);
+        controller.update(this, 'pastHours');
       }
     });
 
@@ -225,13 +242,13 @@ var viewInput = {
 
       gradeInput.addEventListener('keyup', (function(gradeInputCopy) {
         return function() {
-          controller.updateGrade(gradeInputCopy.uniqueID, gradeInputCopy.value);
+          controller.updateGrade(gradeInputCopy);
         }
       })(gradeInput));
 
       hoursInput.addEventListener('keyup', (function(hoursInputCopy) {
         return function() {
-          controller.updateHours(hoursInputCopy.uniqueID, hoursInputCopy.value);
+          controller.updateHours(hoursInputCopy);
         }
       })(hoursInput));
 
@@ -266,18 +283,16 @@ var controller = {
   currentClasses: function() {
     return model.data().currentClasses;
   },
-  update: function(key, value) {
-    console.log(key + ': ' + value);
-    model.savePast(key, value);
+  update: function(element, key) {
+    model.savePast(element, key);
     viewOutput.render();
   },
-  updateGrade: function(id, value) {
-
-    model.saveCurrent(id, 'grade', value);
+  updateGrade: function(element) {
+    model.saveCurrent(element, 'grade');
     viewOutput.render();
   },
-  updateHours: function(id, value) {
-    model.saveCurrent(id, 'hours', value);
+  updateHours: function(element) {
+    model.saveCurrent(element, 'hours');
     viewOutput.render();
   },
   addClass: function() {
@@ -301,6 +316,12 @@ var controller = {
     model.save(updatedData);
     viewOutput.render();
   },
+  addError: function(element) {
+    element.className += ' has-error';
+  },
+  removeError: function(element) {
+    element.className = element.className.replace(/has-error/gi, '');
+  },
   calculatedGPA: function() {
     //GPA = total points / total hours
     //Total points = ∑(grade per class (on 4.0 scale) * hours per class) + previous GPA * previous hours
@@ -315,6 +336,10 @@ var controller = {
     for (var i = 0; i < classes.length; i++) {
       totalPoints += classes[i].grade * classes[i].hours;
       totalHours += parseInt(classes[i].hours);
+    }
+    // fix divide by 0
+    if (totalHours === 0) {
+      totalHours = 1;
     }
     var gpa = totalPoints / totalHours;
     return gpa.toFixed(2);
