@@ -1,3 +1,7 @@
 #current-semester .row {
   margin-bottom: 10px;
 }
+
+#calculated-gpa {
+  font-size: 1.8em;
+}

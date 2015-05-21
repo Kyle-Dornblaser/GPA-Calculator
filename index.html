@@ -42,9 +42,9 @@
     <div class="row">
       <div class="col-lg-8">
         <h3>GPA before this semester</h3>
-        <input type="text" id='past-gpa' class="form-control" placeholder="e.g. 3.50">
+        <input type="number" min="1.0" max="4.0" step="0.01" id='past-gpa' class="form-control" placeholder="e.g. 3.50">
         <h3>Total credit hours before this semester</h3>
-        <input type="text" id='past-hours' class="form-control" placeholder="e.g. 50">
+        <input type="number" min="1.0" max="4.0" step="1.0" id='past-hours' class="form-control" placeholder="e.g. 50">
         <h3>Current semester</h3>
         <div class="row">
           <div class="col-md-6">
@@ -62,14 +62,9 @@
       </div>
 
       <div class="col-lg-4">
-        <h3>Calculated GPA</h3>
-        <div id="calculated-gpa"></div>
+        <h3>Calculated GPA:</h3>
+        <span id="calculated-gpa" class="badge"></span>
 
-        <h4>Subheading</h4>
-        <p>Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Cras mattis consectetur purus sit amet fermentum.</p>
-
-        <h4>Subheading</h4>
-        <p>Maecenas sed diam eget risus varius blandit sit amet non magna.</p>
       </div>
     </div>
 
