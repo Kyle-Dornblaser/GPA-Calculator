@@ -5,9 +5,11 @@ var model = {
         pastGPA: 0,
         pastHours: 0,
         currentClasses: [{
+          id: 0,
           grade: 0,
           hours: 0
         }, {
+          id: 1,
           grade: 0,
           hours: 0
         }]
@@ -20,6 +22,16 @@ var model = {
   },
   save: function(json) {
     localStorage.comkyledornblasergpacalc = JSON.stringify(json)
+  },
+  nextID: function() {
+    var highestID = 0;
+    var currentClasses = this.data().currentClasses;
+    for (var i = 0; i < currentClasses.length; i++) {
+      if (currentClasses[i].id > highestID) {
+        highestID = currentClasses[i].id;
+      }
+    }
+    return highestID + 1;
   }
 };
 
@@ -54,24 +66,43 @@ var view = {
     this.pastHours.value = controller.pastHours();
     this.currentSemester.innerHTML = '';
     for (var i = 0; i < controller.currentClasses().length; i++) {
-      var aClass = document.createElement('div');
-      var grade = [
-        '<div class="col-md-6">',
-        '<input type="text" class="grade form-control" value="',
-        controller.currentClasses()[0].grade,
-        '">',
-        '</div>',
-      ].join('');
+      var row = document.createElement('div');
+      row.className = 'row';
 
-      var hours = [
-        '<div class="col-md-6">',
-        '<input type="text" class="hour form-control" value="',
-        controller.currentClasses()[0].hours,
-        '">',
-        '</div>',
-      ].join('');
-      aClass.innerHTML = '<div class="row">' + grade + hours + '</div>';
-      this.currentSemester.appendChild(aClass);
+      var column1 = document.createElement('div');
+      column1.className = 'col-md-6';
+
+      var column2 = document.createElement('div');
+      column2.className = 'col-md-6';
+
+      var gradeInput = document.createElement('input');
+      gradeInput.className = 'grade form-control';
+      gradeInput.value = controller.currentClasses()[i].grade;
+      gradeInput.uniqueID = controller.currentClasses()[i].id;
+
+      var hoursInput = document.createElement('input');
+      hoursInput.className = 'grade form-control';
+      hoursInput.value = controller.currentClasses()[i].hours;
+      hoursInput.uniqueID = controller.currentClasses()[i].id;
+
+      row.appendChild(column1);
+      row.appendChild(column2);
+      column1.appendChild(gradeInput);
+      column2.appendChild(hoursInput);
+
+      gradeInput.addEventListener('keyup', (function(gradeInputCopy) {
+        return function() {
+          controller.updateGrade(gradeInputCopy.uniqueID, gradeInputCopy.value);
+        }
+      })(gradeInput));
+
+      hoursInput.addEventListener('keyup', (function(hoursInputCopy) {
+        return function() {
+          controller.updateHours(hoursInputCopy.uniqueID, hoursInputCopy.value);
+        }
+      })(hoursInput));
+
+      this.currentSemester.appendChild(row);
     }
   },
   addClass: function() {
@@ -99,9 +130,31 @@ var controller = {
     updatedData[key] = value;
     model.save(updatedData);
   },
+  updateGrade: function(id, value) {
+    var updatedData = model.data();
+    for (var i = 0; i < updatedData.currentClasses.length; i++) {
+      if (updatedData.currentClasses[i].id === id) {
+        updatedData.currentClasses[i].grade = value;
+      }
+    }
+    model.save(updatedData);
+  },
+  updateHours: function(id, value) {
+    var updatedData = model.data();
+    for (var i = 0; i < updatedData.currentClasses.length; i++) {
+      if (updatedData.currentClasses[i].id === id) {
+        updatedData.currentClasses[i].hours = value;
+      }
+    }
+    model.save(updatedData);
+  },
   addClass: function() {
     var updatedData = model.data();
-    var newClass = {hours: 0, grade: 0};
+    var newClass = {
+      id: model.nextID(),
+      hours: 0,
+      grade: 0
+    };
     updatedData.currentClasses.push(newClass);
     model.save(updatedData);
   }
