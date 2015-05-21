@@ -35,7 +35,19 @@ var model = {
   }
 };
 
-var view = {
+var viewOutput = {
+  init: function() {
+    this.calculatedGPA = document.getElementById('calculated-gpa');
+    this.render();
+  },
+  render: function() {
+    var gpa = controller.calculatedGPA();
+    console.log(gpa)
+    this.calculatedGPA.innerHTML = gpa;
+  }
+}
+
+var viewInput = {
   init: function() {
     this.pastGPA = document.getElementById('past-gpa');
     this.pastHours = document.getElementById('past-hours');
@@ -55,7 +67,7 @@ var view = {
     });
 
     this.addClassButton.addEventListener('click', function() {
-      view.addClass();
+      viewInput.addClass();
     });
 
     this.render();
@@ -68,12 +80,16 @@ var view = {
     for (var i = 0; i < controller.currentClasses().length; i++) {
       var row = document.createElement('div');
       row.className = 'row';
+      row.uniqueID = controller.currentClasses()[i].id;
 
       var column1 = document.createElement('div');
-      column1.className = 'col-md-6';
+      column1.className = 'col-md-5';
 
       var column2 = document.createElement('div');
-      column2.className = 'col-md-6';
+      column2.className = 'col-md-5';
+
+      var column3 = document.createElement('div');
+      column3.className = 'col-md-2';
 
       var gradeInput = document.createElement('input');
       gradeInput.className = 'grade form-control';
@@ -85,10 +101,18 @@ var view = {
       hoursInput.value = controller.currentClasses()[i].hours;
       hoursInput.uniqueID = controller.currentClasses()[i].id;
 
+      var removeButton = document.createElement('button');
+      removeButton.className = 'btn btn-danger';
+      removeButton.innerHTML = 'Remove';
+      removeButton.uniqueID = controller.currentClasses()[i].id;
+
       row.appendChild(column1);
       row.appendChild(column2);
+      row.appendChild(column3);
       column1.appendChild(gradeInput);
       column2.appendChild(hoursInput);
+      column3.appendChild(removeButton);
+
 
       gradeInput.addEventListener('keyup', (function(gradeInputCopy) {
         return function() {
@@ -102,6 +126,13 @@ var view = {
         }
       })(hoursInput));
 
+      removeButton.addEventListener('click', (function(rowCopy) {
+        return function() {
+          controller.removeClass(rowCopy.uniqueID);
+          viewInput.currentSemester.removeChild(rowCopy);
+        }
+      })(row));
+
       this.currentSemester.appendChild(row);
     }
   },
@@ -114,7 +145,8 @@ var view = {
 var controller = {
   init: function() {
     model.init();
-    view.init();
+    viewInput.init();
+    viewOutput.init();
   },
   pastGPA: function() {
     return model.data().pastGPA;
@@ -129,6 +161,7 @@ var controller = {
     var updatedData = model.data();
     updatedData[key] = value;
     model.save(updatedData);
+    viewOutput.render();
   },
   updateGrade: function(id, value) {
     var updatedData = model.data();
@@ -138,6 +171,7 @@ var controller = {
       }
     }
     model.save(updatedData);
+    viewOutput.render();
   },
   updateHours: function(id, value) {
     var updatedData = model.data();
@@ -147,6 +181,7 @@ var controller = {
       }
     }
     model.save(updatedData);
+    viewOutput.render();
   },
   addClass: function() {
     var updatedData = model.data();
@@ -157,6 +192,37 @@ var controller = {
     };
     updatedData.currentClasses.push(newClass);
     model.save(updatedData);
+  },
+  removeClass: function(id) {
+    var updatedData = model.data();
+    for (var i = 0; i < updatedData.currentClasses.length; i++) {
+      if (updatedData.currentClasses[i].id === id) {
+        updatedData.currentClasses.splice(i, 1);
+        i--;
+      }
+    }
+    model.save(updatedData);
+    viewOutput.render();
+  },
+  calculatedGPA: function() {
+    //GPA = total points / total hours
+    //Total points = ∑(grade per class (on 4.0 scale) * hours per class) + previous GPA * previous hours
+    //Total hours = ∑(hours per class this semester) + previous hours
+    var data = model.data();
+    var previousGPA = data.pastGPA;
+    var previousHours = data.pastHours;
+    var totalPoints = previousGPA * previousHours;
+    var totalHours = parseInt(previousHours);
+
+    var classes = data.currentClasses;
+    for (var i = 0; i < classes.length; i++) {
+      totalPoints += classes[i].grade * classes[i].hours;
+      totalHours += parseInt(classes[i].hours);
+    }
+    console.log('Points: ' + totalPoints);
+    console.log('Hours:' + totalHours);
+    var gpa = totalPoints / totalHours;
+    return gpa;
   }
 };
 
