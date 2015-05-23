@@ -81,7 +81,7 @@ var model = {
   isValidGPA: function(grade) {
     var minLength = 1;
     var maxLengh = 4;
-    var minValue = 1.0;
+    var minValue = 0.0;
     var maxValue = 4.0;
     if (isNaN(grade)) {
       valid = false;
@@ -97,7 +97,7 @@ var model = {
   isValidPastHours: function(hours) {
     var minLength = 1;
     var maxLengh = 3;
-    var minValue = 1;
+    var minValue = 0;
     var maxValue = 200;
     if (isNaN(hours)) {
       valid = false;
@@ -113,7 +113,7 @@ var model = {
   isValidGrade: function(grade) {
     var minLength = 1;
     var maxLengh = 1;
-    var minValue = 1;
+    var minValue = 0;
     var maxValue = 4;
     if (isNaN(grade)) {
       valid = false;
@@ -129,7 +129,7 @@ var model = {
   isValidHours: function(hours) {
     var minLength = 1;
     var maxLengh = 1;
-    var minValue = 1;
+    var minValue = 0;
     var maxValue = 4;
     if (isNaN(hours)) {
       valid = false;
@@ -165,7 +165,7 @@ var viewOutput = {
     this.background(gpa);
   },
   background: function(gpa) {
-    var colors = ['#000000', '#000000', '#ff0000', '#0000ff', '#00ff00'];
+    var colors = ['#FFAB00', '#FFAB00', '#FFD600', '#AEEA00', '#64DD17'];
     var backgroundColor = this.shadeBlend(gpa % 1, colors[Math.floor(gpa)], colors[Math.ceil(gpa)]);
 
     this.calculatedGPA.style.backgroundColor = backgroundColor;
