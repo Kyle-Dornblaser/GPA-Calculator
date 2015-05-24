@@ -23,24 +23,27 @@
 <body>
 
   <div class="container">
-    <div class="header clearfix">
-      <nav>
-        <ul class="nav nav-pills pull-right">
-          <li role="presentation" class="active"><a href="#">Home</a></li>
-          <li role="presentation"><a href="#">About</a></li>
-          <li role="presentation"><a href="#">Contact</a></li>
-        </ul>
-      </nav>
-      <h3 class="text-muted">Project name</h3>
-    </div>
-
-    <div class="jumbotron">
+    <div class="jumbotron top-box">
       <h1>GPA Calculator</h1>
       <p class="lead">Calculate your GPA on the standard 4.0 scale.</p>
     </div>
 
     <div class="row">
-      <div class="col-lg-8">
+      <div class="col-lg-4 col-lg-push-8">
+        <h3>Calculated GPA:</h3>
+        <span id="calculated-gpa" class="badge"></span>
+        <h3>Instructions</h3>
+        <p>Enter grade on 4.0 scale.</p>
+        <ul>
+          <li>A: 4.0</li>
+          <li>B: 3.0</li>
+          <li>C: 2.0</li>
+          <li>D: 1.0</li>
+          <li>F: 0.0</li>
+        </ul>
+      </div>
+
+      <div class="col-lg-8 col-lg-pull-4">
         <h3>GPA before this semester</h3>
         <input type="text" id='past-gpa' class="form-control" placeholder="e.g. 3.50">
         <h3>Total credit hours before this semester</h3>
@@ -58,13 +61,6 @@
 
         </div>
         <button id="add-class" class="btn btn-success">Add Class</button>
-
-      </div>
-
-      <div class="col-lg-4">
-        <h3>Calculated GPA:</h3>
-        <span id="calculated-gpa" class="badge"></span>
-
       </div>
     </div>
 
